@@ -5,14 +5,15 @@ const OPTIMAL_CHAIN_MIN_LENGTH = 3;
 const OPTIMAL_CHAIN_MAX_LENGTH = 10;
 
 export default class MessageGenerator {
-
     logger = log4js.getLogger('MessageGenerator');
 
     constructor(
         private topWords: string[],
         private messages: string[][]
     ) {
-        this.messages = this.messages.filter(message => message.length > 1);
+        this.messages = this.messages
+            .filter(message => message.length > 2)
+            .filter(message => this.topWords.some(word => message.includes(word)));
     }
 
     generateResponse(message: string): string {
@@ -28,11 +29,15 @@ export default class MessageGenerator {
 
             const messages2 = this.messages
                 .filter(message => message.includes(topWord) && message != message1);
+            console.log(topWord);
             const message2 = lodash.sample(messages2);
             if (message2) {
                 const topWordIndex2 = this.findRandomWordIndex(message2, topWord);
                 const leftChain2 = this.findChain(message2, topWordIndex2, -1);
                 const rightChain2 = this.findChain(message2, topWordIndex2, 1);
+
+                console.log(formatSentence(message1), '[L] ' + formatSentence(leftChain1), '[R] ' + formatSentence(rightChain1));
+                console.log(formatSentence(message2), '[L] ' + formatSentence(leftChain2), '[R] ' + formatSentence(rightChain2));
 
                 const favor1 = getFavor(leftChain1) + getFavor(rightChain2);
                 const favor2 = getFavor(leftChain2) + getFavor(rightChain1);
@@ -52,9 +57,9 @@ export default class MessageGenerator {
             if (index < 0 || index >= message.length)
                 break;
             const word = message[index];
-            if (this.topWords.includes(word) && sentence.length >= OPTIMAL_CHAIN_MIN_LENGTH)
+            if (this.topWords.includes(word) && sentence.length > OPTIMAL_CHAIN_MIN_LENGTH)
                 break;
-            if (word == '.' && sentence.length >= OPTIMAL_CHAIN_MIN_LENGTH)
+            if (word == '.' && sentence.length > OPTIMAL_CHAIN_MIN_LENGTH)
                 break;
             if (word != '.')
                 if (direction > 0)
@@ -95,6 +100,7 @@ export default class MessageGenerator {
             messages = this.messages.filter(message => this.topWords.some(word => message.includes(word)));
         if (messages.length == 0)
             messages = this.messages;
+        console.log(messages.length);
         return messages;
     }
 }
@@ -146,7 +152,7 @@ function getFavor(array: any[]): number {
 function connect(chain1: string[], chain2: string[]): string[] {
     if (chain1.length) {
         chain1 = chain1.slice();
-        chain1[chain1.length - 1] = chain1[chain1.length - 1] + ',';
+        chain1[chain1.length - 1] = '_' + chain1[chain1.length - 1] + '_';
     }
     return lodash.concat(chain1, chain2.slice(1));
 }

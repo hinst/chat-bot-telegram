@@ -4,7 +4,8 @@ import log4js from 'log4js';
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import MessageGenerator from './MessageGenerator';
-import { MESSAGES, TOP_WORDS } from './data/topWords';
+import { MESSAGES } from './data/topWords';
+import { CUSTOM_TOP_WORDS } from './customTopWords';
 
 log4js.configure({
     appenders: {
@@ -33,15 +34,14 @@ bot.on('text', context => {
     const senderId = context.message?.from?.id;
     if (allowedUserIds.includes(senderId)) {
         const incomingMessage = context.message.text;
-        const generator = new MessageGenerator(TOP_WORDS, MESSAGES);
+        const generator = new MessageGenerator(CUSTOM_TOP_WORDS, MESSAGES);
         const responseText = generator.generateResponse(incomingMessage);
-        context.reply(responseText);
+        context.reply(responseText, { parse_mode: 'Markdown' });
     } else {
         context.reply("Error: you are not authorized to use this bot. Your id is " + senderId + ". " +
         "Please ask the owner of the bot to add you to the list of authorized users.");
     }
 });
 
-if (false)
 bot.launch();
 logger.info('Started.');
