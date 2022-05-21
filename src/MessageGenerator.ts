@@ -152,7 +152,7 @@ function getFavor(array: any[]): number {
 function connect(chain1: string[], chain2: string[]): string[] {
     if (chain1.length) {
         chain1 = chain1.slice();
-        chain1[chain1.length - 1] = '_' + chain1[chain1.length - 1] + '_';
+        chain1[chain1.length - 1] = chain1[chain1.length - 1];
     }
     return lodash.concat(chain1, chain2.slice(1));
 }
