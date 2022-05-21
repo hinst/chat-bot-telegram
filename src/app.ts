@@ -9,7 +9,7 @@ import { MESSAGES, TOP_WORDS } from './data/topWords';
 log4js.configure({
   appenders: {
     console: { type: 'console' },
-    files: { type: 'dateFile', filename: 'log.txt', keepFileExt: true, numBackups: 10 }
+    files: { type: 'dateFile', filename: 'log.txt', alwaysIncludePattern: true, keepFileExt: true, numBackups: 10 }
   },
   categories: {
     default: { appenders: [ 'console', 'files' ], level: 'debug' }
@@ -26,7 +26,7 @@ if (!allowedUserIds.length)
     logger.warn("There are no allowed user ids");
 
 bot.start(context => {
-    context.reply('Hello. My name is Alex Sharp.');
+    context.reply('Hello. My name is Alex Sharp');
 });
 
 bot.on('text', context => {
@@ -37,7 +37,8 @@ bot.on('text', context => {
         const responseText = generator.generateResponse(incomingMessage);
         context.reply(responseText);
     } else {
-        context.reply("Error: you are not authorized to use this bot. Your id is " + senderId);
+        context.reply("Error: you are not authorized to use this bot. Your id is " + senderId + ". " +
+            "Please ask the owner of the bot to add you to the list of authorized users.");
     }
 });
 
