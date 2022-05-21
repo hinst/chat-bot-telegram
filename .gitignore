@@ -4,3 +4,5 @@
 /allowed-user-ids.json
 /src/data
 /log*.txt
+/rsync.sh
+/dist
