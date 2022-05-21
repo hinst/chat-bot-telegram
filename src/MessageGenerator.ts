@@ -1,3 +1,5 @@
+import lodash from 'lodash';
+
 export default class MessageGenerator {
     constructor(
         private topWords: string[],
@@ -13,6 +15,7 @@ export default class MessageGenerator {
             messages = this.messages.filter(message => message.some(word => word.includes(desiredWord)));
         if (messages.length == 0)
             messages = this.messages.filter(message => this.topWords.some(word => message.includes(word)));
+
 
     }
 }
