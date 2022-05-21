@@ -1,1 +1,1 @@
-node compiled/app.js >/dev/null 2>&1
+node compiled/app.js --path="$(pwd)"
