@@ -1,3 +1,4 @@
 /node_modules
 /compiled
 /token.txt
+/allowed-user-ids.json
