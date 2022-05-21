@@ -1,6 +1,10 @@
 import lodash from 'lodash';
+import log4js from 'log4js';
 
 export default class MessageGenerator {
+
+    logger = log4js.getLogger('MessageGenerator');
+
     constructor(
         private topWords: string[],
         private messages: string[][]
