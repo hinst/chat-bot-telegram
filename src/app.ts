@@ -7,13 +7,13 @@ import MessageGenerator from './MessageGenerator';
 import { MESSAGES, TOP_WORDS } from './data/topWords';
 
 log4js.configure({
-  appenders: {
-    console: { type: 'console' },
-    files: { type: 'dateFile', filename: 'log.txt', alwaysIncludePattern: true, keepFileExt: true, numBackups: 10 }
-  },
-  categories: {
-    default: { appenders: [ 'console', 'files' ], level: 'debug' }
-  }
+    appenders: {
+        console: { type: 'console' },
+        files: { type: 'dateFile', filename: 'log.txt', alwaysIncludePattern: true, keepFileExt: true, numBackups: 10 }
+    },
+    categories: {
+        default: { appenders: [ 'console', 'files' ], level: 'debug' }
+    }
 });
 
 const logger = log4js.getLogger('app');
@@ -23,10 +23,13 @@ const apiToken = fs.readFileSync('./token.txt').toString();
 const bot: Telegraf<Context<Update>> = new Telegraf(apiToken);
 const allowedUserIds: number[] = JSON.parse(fs.readFileSync('./allowed-user-ids.json').toString());
 if (!allowedUserIds.length)
-    logger.warn("There are no allowed user ids");
+logger.warn("There are no allowed user ids");
 
 bot.start(context => {
-    context.reply('Hello. My name is Alex Sharp');
+    context.reply('Hello. ' +
+        'Type ! to get a random sentence. ' +
+        'Type a word and I will try to generate a sentence with this word.'
+    );
 });
 
 bot.on('text', context => {
@@ -38,10 +41,10 @@ bot.on('text', context => {
         context.reply(responseText);
     } else {
         context.reply("Error: you are not authorized to use this bot. Your id is " + senderId + ". " +
-            "Please ask the owner of the bot to add you to the list of authorized users.");
+        "Please ask the owner of the bot to add you to the list of authorized users.");
     }
 });
 
 if (false)
-    bot.launch();
+bot.launch();
 logger.info('Started.');
