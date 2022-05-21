@@ -26,10 +26,7 @@ if (!allowedUserIds.length)
 logger.warn("There are no allowed user ids");
 
 bot.start(context => {
-    context.reply('Hello. ' +
-        'Type ! to get a random sentence. ' +
-        'Type a word and I will try to generate a sentence with this word.'
-    );
+    context.reply('Hello. ' + 'Type ! to get a random sentence.');
 });
 
 bot.on('text', context => {

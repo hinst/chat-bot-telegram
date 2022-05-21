@@ -1,7 +1,7 @@
 import lodash from 'lodash';
 import log4js from 'log4js';
 
-const OPTIMAL_CHAIN_MIN_LENGTH = 5;
+const OPTIMAL_CHAIN_MIN_LENGTH = 3;
 const OPTIMAL_CHAIN_MAX_LENGTH = 10;
 
 export default class MessageGenerator {
@@ -11,7 +11,9 @@ export default class MessageGenerator {
     constructor(
         private topWords: string[],
         private messages: string[][]
-    ) {}
+    ) {
+        this.messages = this.messages.filter(message => message.length > 1);
+    }
 
     generateResponse(message: string): string {
         const words = getWords(message);
@@ -19,9 +21,25 @@ export default class MessageGenerator {
         const messages1 = this.findMessageCandidates(desiredWord);
         const message1 = lodash.sample(messages1);
         if (message1) {
-            let desiredWordIndex = message1.indexOf(desiredWord);
-            if (desiredWordIndex >= 0) {
-                const nextTopWordIndex = this.findNextTopWordIndex(message1, desiredWordIndex);
+            const topWordIndex1 = this.findRandomTopWordIndex(message1);
+            const topWord = message1[topWordIndex1];
+            const leftChain1 = this.findChain(message1, topWordIndex1, -1);
+            const rightChain1 = this.findChain(message1, topWordIndex1, 1);
+
+            const messages2 = this.messages
+                .filter(message => message.includes(topWord) && message != message1);
+            const message2 = lodash.sample(messages2);
+            if (message2) {
+                const topWordIndex2 = this.findRandomWordIndex(message2, topWord);
+                const leftChain2 = this.findChain(message2, topWordIndex2, -1);
+                const rightChain2 = this.findChain(message2, topWordIndex2, 1);
+
+                const favor1 = getFavor(leftChain1) + getFavor(rightChain2);
+                const favor2 = getFavor(leftChain2) + getFavor(rightChain1);
+                const chain = favor1 > favor2
+                    ? connect(leftChain1, rightChain2)
+                    : connect(leftChain2, rightChain1);
+                return formatSentence(chain);
             }
         }
         return 'Unable to generate a response.';
@@ -47,18 +65,26 @@ export default class MessageGenerator {
         return sentence;
     }
 
-    private findNextTopWordIndex(message: string[], index: number) {
-        for (let i = index + 1; i < message.length; i++)
-            if (this.topWords.includes(message[i]))
-                return i;
-        return -1;
+    private findRandomTopWordIndex(message: string[]) {
+        const topWords = message
+            .map((word, index) => ({word, index}))
+            .filter(entry => this.topWords.includes(entry.word));
+        const topWordEntry = lodash.sample(topWords);
+        if (topWordEntry)
+            return topWordEntry.index;
+        else
+            return -1;
     }
 
-    private findPreviousTopWordIndex(message: string[], index: number) {
-        for (let i = index - 1; 0 <= i; i--)
-            if (this.topWords.includes(message[i]))
-                return i;
-        return -1;
+    private findRandomWordIndex(message: string[], word: string) {
+        const words = message
+            .map((word, index) => ({word, index}))
+            .filter(entry => entry.word == word);
+        const wordEntry = lodash.sample(words);
+        if (wordEntry)
+            return wordEntry.index;
+        else
+            return -1;
     }
 
     private findMessageCandidates(desiredWord: string) {
@@ -101,4 +127,26 @@ function getRandomInteger(limit: number) {
 
 function formatSentence(message: string[]): string {
     return lodash.upperFirst(message.join(' ')) + '.';
+}
+
+function isOptimalLength(array: any[]): boolean {
+    return OPTIMAL_CHAIN_MIN_LENGTH < array.length && array.length < OPTIMAL_CHAIN_MAX_LENGTH;
+}
+
+function getFavor(array: any[]): number {
+    if (array.length == 0)
+        return -1;
+    if (array.length == 1)
+        return 0;
+    if (isOptimalLength(array))
+        return 2;
+    return 1;
+}
+
+function connect(chain1: string[], chain2: string[]): string[] {
+    if (chain1.length) {
+        chain1 = chain1.slice();
+        chain1[chain1.length - 1] = chain1[chain1.length - 1] + ',';
+    }
+    return lodash.concat(chain1, chain2.slice(1));
 }
